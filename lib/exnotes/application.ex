@@ -7,13 +7,9 @@ defmodule Exnotes.Application do
 
   def start(_type, _args) do
     # List all child processes to be supervised
-    children = []
-
-    unless Mix.env() == :test do
-      spawn(fn ->
-        Exnotes.TUI.App.start_app()
-      end)
-    end
+    children = [
+      Exnotes.TUI.App
+    ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

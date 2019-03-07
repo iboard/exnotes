@@ -7,7 +7,7 @@ defmodule ExnotesTest do
   end
 
   test "Read directory-tree" do
-    tree = Exnotes.tree()
+    tree = Exnotes.files()
 
     assert ["index.md", "subdir1/index.md", "subdir2/index.md"] == tree
   end
@@ -25,6 +25,6 @@ defmodule ExnotesTest do
                path: "subdir2/index.md",
                title: "Index of subdir 2"
              }
-           ] == Exnotes.meta_tree()
+           ] == Exnotes.meta()
   end
 end
