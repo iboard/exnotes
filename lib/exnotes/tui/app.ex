@@ -28,7 +28,8 @@ defmodule Exnotes.TUI.App do
       selected_row: 0,
       updates: 0,
       scroll_pos: 0,
-      selected_file: nil
+      selected_file: nil,
+      selected_panel: :files
     }
   end
 
@@ -58,6 +59,15 @@ defmodule Exnotes.TUI.App do
       {:event, %{ch: ?k}} ->
         %{model | selected_row: selected_row(model, :dec)}
 
+      {:event, %{ch: ?f}} ->
+        %{model | selected_panel: :files}
+
+      {:event, %{ch: ?m}} ->
+        %{model | selected_panel: :meta}
+
+      {:event, %{ch: ?c}} ->
+        %{model | selected_panel: :file}
+
       {:event, %{ch: ch}} ->
         model
 
@@ -65,6 +75,14 @@ defmodule Exnotes.TUI.App do
         model
     end
   end
+
+   def pane_attributes(model,current) do
+     case model.selected_panel == current do
+       true -> @style_selected
+       false -> []
+
+     end
+   end
 
   defp read_current_file(%{selected_file: nil}), do: []
   defp read_current_file(%{selected_file: meta}) do
@@ -102,6 +120,13 @@ defmodule Exnotes.TUI.App do
     h - 12
   end
 
+  defp title_bar(model,current,txt) do
+    case model.selected_panel == current do
+      true -> { txt, [background: color(:white), color: color(:black)] }
+      false -> txt
+    end
+  end
+
   def render(model) do
     num_lines = Enum.count(model.files)
     lines_shown = height()
@@ -127,7 +152,7 @@ defmodule Exnotes.TUI.App do
 
       row do
         column size: 4 do
-          panel title: "Files (j=down, k=up, ENTER=select)", height: :fill do
+          panel title: title_bar(model,:files,"[F]iles (j=down, k=up, ENTER=select)"), height: :fill do
             table do
               table_row attributes: [@bold] do
                 table_cell(content: "Title")
@@ -147,7 +172,7 @@ defmodule Exnotes.TUI.App do
         end
 
         column size: 8 do
-          panel title: "<#{file_title(model)}>" do
+          panel title: title_bar(model,:meta,"[M]eta: " <> file_title(model)) do
             for line <- file_content(model) |> String.split("\n") do
               label do
                 text(content: line)
@@ -155,7 +180,7 @@ defmodule Exnotes.TUI.App do
             end
           end
 
-          panel title: "<#{file_title(model)}>", height: :fill do
+          panel title: title_bar(model,:file,"[C]ontent " <> file_title(model)), height: :fill do
             for line <- read_current_file(model) do
               label do
                 text(content: line)

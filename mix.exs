@@ -24,7 +24,7 @@ defmodule Exnotes.MixProject do
     [
       {:yaml_elixir, "~> 2.1"},
       {:timewrap, "~> 0.1"},
-      {:ratatouille, "~> 0.4.0"}
+      {:ratatouille, path: "../../open_software/ratatouille"}
     ]
   end
 end
