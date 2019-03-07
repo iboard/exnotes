@@ -2,7 +2,7 @@
   "asciichart": {:hex, :asciichart, "1.0.0", "6ef5dbeab545cb7a0bdce7235958f129de6cd8ad193684dc0953c9a8b4c3db5b", [:mix], [], "hexpm"},
   "elixir_make": {:hex, :elixir_make, "0.5.2", "96a28c79f5b8d34879cd95ebc04d2a0d678cfbbd3e74c43cb63a76adf0ee8054", [:mix], [], "hexpm"},
   "ex_termbox": {:hex, :ex_termbox, "1.0.0", "6f26a0cdc787c0685732649beee6973248504fc689776cf57a485422be8dac4b", [:make, :mix], [{:elixir_make, "~> 0.4", [hex: :elixir_make, repo: "hexpm", optional: false]}], "hexpm"},
-  "ratatouille": {:hex, :ratatouille, "0.4.2", "bb4e8d05ec5bf66013cf69380dd1878658e1cb718d61c05ef0e8fcc7dbe73b6b", [:mix], [{:asciichart, "~> 1.0", [hex: :asciichart, repo: "hexpm", optional: false]}, {:ex_termbox, "~> 1.0", [hex: :ex_termbox, repo: "hexpm", optional: false]}], "hexpm"},
+  "ratatouille": {:git, "git@github.com:iboard/ratatouille.git", "4573b20f4ed888c2c85cfa228b97ea2af3de6857", []},
   "timewrap": {:hex, :timewrap, "0.1.4", "f76686613008c98cfbce5d1d59982937ae1c26ff7da6dce27c791dfaf509127a", [:mix], [], "hexpm"},
   "yamerl": {:hex, :yamerl, "0.7.0", "e51dba652dce74c20a88294130b48051ebbbb0be7d76f22de064f0f3ccf0aaf5", [:rebar3], [], "hexpm"},
   "yaml_elixir": {:hex, :yaml_elixir, "2.1.0", "79ec163e0f379dadf4b0e8b5162567dc1feb96c3cfa793105869e2c616ab4342", [:mix], [{:yamerl, "~> 0.7", [hex: :yamerl, repo: "hexpm", optional: false]}], "hexpm"},
