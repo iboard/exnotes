@@ -24,7 +24,8 @@ defmodule Exnotes.MixProject do
     [
       {:yaml_elixir, "~> 2.1"},
       {:timewrap, "~> 0.1"},
-      {:ratatouille, git: "git@github.com:iboard/ratatouille.git"}
+      #{:ratatouille, git: "git@github.com:iboard/ratatouille.git"}
+      {:ratatouille, path: "../../open_software/ratatouille"}
     ]
   end
 end

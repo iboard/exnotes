@@ -68,6 +68,11 @@ defmodule Exnotes.TUI.App do
       {:event, %{ch: ?c}} ->
         %{model | selected_panel: :file}
 
+      {:event, %{ch: ?e}} ->
+        path = Path.join(Exnotes.data_path(),model.selected_file.path)
+        System.cmd("open", ["-a", "MacVim", path])
+        model
+
       {:event, %{ch: ch}} ->
         model
 
@@ -120,11 +125,19 @@ defmodule Exnotes.TUI.App do
     h - 12
   end
 
-  defp title_bar(model,current,txt) do
+  defp with_highlighted_title(title,model,current,extra_attr \\ []) do
+    attr =
     case model.selected_panel == current do
-      true -> { txt, [background: color(:white), color: color(:black)] }
-      false -> txt
+      true ->  [title: title, color: color(:black), background: color(:yellow)]
+      false -> [title: title]
     end
+    attr ++ extra_attr
+  end
+
+  defp format_time(:never), do: "(never)"
+  defp format_time(seconds) do
+    DateTime.from_unix!(seconds)
+    |> to_string
   end
 
   def render(model) do
@@ -134,9 +147,9 @@ defmodule Exnotes.TUI.App do
     view do
       panel title: "ExNotes ([q]uit)" do
         row do
-          column(size: width()) do
-            label(content: "      Started: #{model.app_started}")
-            label(content: "  Last Update: #{model.last_update}")
+          column(size: 4) do
+            label(content: "      Started: #{format_time(model.app_started)}")
+            label(content: "  Last Update: #{format_time(model.last_update)}")
             label(content: "      Updates: #{model.updates}")
             label(content: " Width/Height: #{width()}x#{height()}")
 
@@ -147,12 +160,19 @@ defmodule Exnotes.TUI.App do
 
             label(content: " Selected Row: #{model.selected_row}")
           end
+          column(size: 8) do
+            label(content: "  Select a file                Select panel    With selected file")
+            label(content: "")
+            label(content: "  j ... move selection down    [F]iles         [E]dit")
+            label(content: "  k ... move selection up      [M]eta          [O]pen enclosing folder")
+            label(content: "  ENTER select current file    [C]ontent")
+          end
         end
       end
 
       row do
         column size: 4 do
-          panel title: title_bar(model,:files,"[F]iles (j=down, k=up, ENTER=select)"), height: :fill do
+          panel with_highlighted_title("[F]iles (j=down, k=up, ENTER=select)",model,:files,height: :fill) do
             table do
               table_row attributes: [@bold] do
                 table_cell(content: "Title")
@@ -172,7 +192,7 @@ defmodule Exnotes.TUI.App do
         end
 
         column size: 8 do
-          panel title: title_bar(model,:meta,"[M]eta: " <> file_title(model)) do
+          panel with_highlighted_title("[M]eta: " <> file_title(model),model,:meta) do
             for line <- file_content(model) |> String.split("\n") do
               label do
                 text(content: line)
@@ -180,7 +200,7 @@ defmodule Exnotes.TUI.App do
             end
           end
 
-          panel title: title_bar(model,:file,"[C]ontent " <> file_title(model)), height: :fill do
+          panel with_highlighted_title("[C]ontent " <> file_title(model),model,:file, height: :fill) do
             for line <- read_current_file(model) do
               label do
                 text(content: line)
