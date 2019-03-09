@@ -60,7 +60,7 @@ defmodule Exnotes.TUI.App do
         %{model | selected_row: selected_row(model, :dec)}
 
       {:event, %{ch: ?f}} ->
-        %{model | selected_panel: :files}
+        %{model | selected_panel: :files, files: Exnotes.meta()}
 
       {:event, %{ch: ?m}} ->
         %{model | selected_panel: :meta}
