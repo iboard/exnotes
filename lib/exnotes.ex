@@ -1,9 +1,10 @@
 defmodule Exnotes do
+  require Logger
   @moduledoc """
   Documentation for Exnotes.
   """
 
-  @data_path Application.get_env(:exnotes, :datadir) 
+  @data_path Application.get_env(:exnotes, :datadir)
   def data_path(), do: @data_path
 
   @doc """
@@ -39,17 +40,7 @@ defmodule Exnotes do
 
   """
   def files(path) do
-    case File.dir?(path) do
-      false ->
-        [path]
-
-      true ->
-        File.ls!(path)
-        |> Enum.reduce([], fn file, acc ->
-          subdir = Path.join(path, file)
-          [files(subdir) | acc]
-        end)
-    end
+    Files.list_all(path)
   end
 
   @doc """
@@ -80,28 +71,37 @@ defmodule Exnotes do
   """
   def meta() do
     files()
-    |> Enum.map( &build_meta/1 )
+    |> Enum.map(&build_meta/1)
   end
 
   defp build_meta(file) do
     path = Path.join("#{data_path()}", file)
 
-    File.read!(path)
-    |> String.split("\n")
-    |> read_meta()
-    |> build_meta_struct(path)
+    case File.read(path) do
+      {:ok, f} ->
+        f
+        |> String.split("\n")
+        |> read_meta()
+        |> build_meta_struct(path)
+
+      {:error, error} ->
+        %{ error: error }
+    end
   end
 
-  defp build_meta_struct({:ok, meta}, path), do: Map.merge( meta, %{ path: Path.relative_to(path, data_path()) } )
-  defp build_meta_struct(_,path), do: %{ path: Path.relative_to(path, data_path()) } 
+  defp build_meta_struct({:ok, meta}, path),
+    do: Map.merge(meta, %{path: Path.relative_to(path, data_path())})
 
-  defp read_meta([first_line | rest] ) when first_line == "---" do
+  defp build_meta_struct(_, path), do: %{path: Path.relative_to(path, data_path())}
+
+  defp read_meta([first_line | rest]) when first_line == "---" do
     rest
     |> Enum.take_while(fn line -> line != "---" end)
     |> Enum.join("\n")
     |> YamlElixir.read_from_string(atoms: true)
     |> convert_keys()
   end
+
   defp read_meta(_), do: %{}
 
   defp relative_paths(list) do
@@ -111,8 +111,9 @@ defmodule Exnotes do
   end
 
   defp convert_keys({:ok, meta}) do
-    {:ok, snake_case_map(meta) }
+    {:ok, snake_case_map(meta)}
   end
+
   defp convert_keys(_), do: {:ok, %{}}
 
   defp snake_case_map(map) when is_map(map) do
@@ -120,7 +121,7 @@ defmodule Exnotes do
       Map.put(result, String.to_atom(Macro.underscore(key)), snake_case_map(value))
     end)
   end
+
   defp snake_case_map(list) when is_list(list), do: Enum.map(list, &snake_case_map/1)
   defp snake_case_map(value), do: value
-
 end

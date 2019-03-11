@@ -182,9 +182,9 @@ defmodule Exnotes.TUI.App do
 
               for r <- model.files |> Enum.drop(model.scroll_pos) |> Enum.take(height()) do
                 table_row(selected_attr(model, r)) do
-                  table_cell(content: r.title)
-                  table_cell(content: r.author)
-                  table_cell(content: r.path)
+                  table_cell(content: r[:title])
+                  table_cell(content: r[:author])
+                  table_cell(content: r[:path])
                 end
               end
             end
