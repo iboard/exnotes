@@ -14,9 +14,9 @@ and you can enter and scroll text. That's all at the moment.
 
 ### Plans
 
-  * Read the file-tree through Exnotes and display them in a tree within the TUI.
-  * Select a file and show it in a second pane.
-  * Select a file and open it in vim ($EDITOR)
+  - [x] Read the file-tree through Exnotes and display them in a tree within the TUI.
+  - [x] Select a file and show it in a second pane.
+  - [x] Select a file and open it in vim ($EDITOR) (partly, through open gui in background--should open in Terminal)
   * Add new files (Posts)
   * Export pages to HTML
   * Use CSS templates
@@ -27,7 +27,7 @@ and you can enter and scroll text. That's all at the moment.
 
 ## Run the app
 
-     mix run --no-halt
+     mix run
 
 
 
