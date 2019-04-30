@@ -51,7 +51,7 @@ defmodule Exnotes.TUI.App do
         %{model | scroll_pos: scroll_up(model.scroll_pos)}
 
       {:event, %{key: @down}} ->
-        %{model | scroll_pos: scroll_down(model.scroll_pos)}
+        %{model | scroll_pos: scroll_down(model)}
 
       {:event, %{ch: ?j}} ->
         %{model | selected_row: selected_row(model, :inc)}
@@ -69,7 +69,7 @@ defmodule Exnotes.TUI.App do
         %{model | selected_panel: :file}
 
       {:event, %{ch: ?e}} ->
-        path = Path.join(Exnotes.data_path(),model.selected_file.path)
+        path = Path.join(Exnotes.data_path(), model.selected_file.path)
         System.cmd("open", ["-a", "MacVim", path])
         model
 
@@ -81,18 +81,11 @@ defmodule Exnotes.TUI.App do
     end
   end
 
-   def pane_attributes(model,current) do
-     case model.selected_panel == current do
-       true -> @style_selected
-       false -> []
-
-     end
-   end
-
   defp read_current_file(%{selected_file: nil}), do: []
+
   defp read_current_file(%{selected_file: meta}) do
     Path.join(Exnotes.data_path(), meta.path)
-    |> File.read!
+    |> File.read!()
     |> String.split("\n")
   end
 
@@ -106,7 +99,7 @@ defmodule Exnotes.TUI.App do
 
   defp scroll_up(pos) when pos > 0, do: pos - 1
   defp scroll_up(_pos), do: 0
-  defp scroll_down(pos), do: pos + 1
+  defp scroll_down(model), do: min(model.scroll_pos + 1, Enum.count(model.files))
 
   defp selected_attr(model, current_row) do
     cond do
@@ -125,16 +118,18 @@ defmodule Exnotes.TUI.App do
     h - 12
   end
 
-  defp with_highlighted_title(title,model,current,extra_attr \\ []) do
+  defp with_highlighted_title(title, model, current, extra_attr \\ []) do
     attr =
-    case model.selected_panel == current do
-      true ->  [title: title, color: color(:black), background: color(:yellow)]
-      false -> [title: title]
-    end
+      case model.selected_panel == current do
+        true -> [title: title, color: color(:black), background: color(:yellow)]
+        false -> [title: title]
+      end
+
     attr ++ extra_attr
   end
 
   defp format_time(:never), do: "(never)"
+
   defp format_time(seconds) do
     DateTime.from_unix!(seconds)
     |> to_string
@@ -160,11 +155,16 @@ defmodule Exnotes.TUI.App do
 
             label(content: " Selected Row: #{model.selected_row}")
           end
+
           column(size: 8) do
             label(content: "  Select a file                Select panel    With selected file")
             label(content: "")
             label(content: "  j ... move selection down    [F]iles         [E]dit")
-            label(content: "  k ... move selection up      [M]eta          [O]pen enclosing folder")
+
+            label(
+              content: "  k ... move selection up      [M]eta          [O]pen enclosing folder"
+            )
+
             label(content: "  ENTER select current file    [C]ontent")
           end
         end
@@ -172,7 +172,9 @@ defmodule Exnotes.TUI.App do
 
       row do
         column size: 4 do
-          panel with_highlighted_title("[F]iles (j=down, k=up, ENTER=select)",model,:files,height: :fill) do
+          panel with_highlighted_title("[F]iles (j=down, k=up, ENTER=select)", model, :files,
+                  height: :fill
+                ) do
             table do
               table_row attributes: [@bold] do
                 table_cell(content: "Title")
@@ -192,7 +194,7 @@ defmodule Exnotes.TUI.App do
         end
 
         column size: 8 do
-          panel with_highlighted_title("[M]eta: " <> file_title(model),model,:meta) do
+          panel with_highlighted_title("[M]eta: " <> file_title(model), model, :meta) do
             for line <- file_content(model) |> String.split("\n") do
               label do
                 text(content: line)
@@ -200,7 +202,9 @@ defmodule Exnotes.TUI.App do
             end
           end
 
-          panel with_highlighted_title("[C]ontent " <> file_title(model),model,:file, height: :fill) do
+          panel with_highlighted_title("[C]ontent " <> file_title(model), model, :file,
+                  height: :fill
+                ) do
             for line <- read_current_file(model) do
               label do
                 text(content: line)
@@ -224,9 +228,10 @@ defmodule Exnotes.TUI.App do
   def start_app(_) do
     # pid = spawn Ratatouille, :run, [Exnotes.TUI.App, []]
     # quit_events: [{:char, ?q}]
-    unless Mix.env == :test do
+    unless Mix.env() == :test do
       Ratatouille.run(__MODULE__, [])
     end
+
     {:ok, self()}
   end
 
